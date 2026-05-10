@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getLps } from '../apis/lpApi';
 import LpCard from '../component/LpChip';
 import SkeletonCard from '../component/SkeletonCard';
@@ -13,6 +13,7 @@ const Home = () => {
     queryKey: ['lps', { order }],
     queryFn: () => getLps(order, 0, 20),
     staleTime: 1000 * 60,
+    placeholderData: keepPreviousData,
   });
 
   const lpItems = data?.data || [];

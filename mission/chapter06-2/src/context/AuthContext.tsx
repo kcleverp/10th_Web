@@ -7,6 +7,7 @@ import type { RequestSignIn } from '../types/authType';
 
 // 1. 유저 정보 인터페이스 (서버 응답 명세에 맞춰 name 사용)
 interface User {
+  id: number;
   email: string;
   name: string; 
 }
@@ -60,13 +61,14 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
       // response.data 구조 분해 할당 시 서버 필드명(name) 확인 필수
       if (response && response.data) {
-        const { email, name, nickname, accessToken, refreshToken } = response.data;
+        const { email, name, nickname, accessToken, refreshToken, id } = response.data;
         
         // 💡 핵심 수정: 서버가 주는 값이 name이라면 name을, nickname이라면 nickname을 사용하세요.
         // Mypage에서 name을 사용했으므로 name을 우선적으로 저장합니다.
         const userName = name || nickname || "사용자";
 
         setUser({ 
+          id,
           email, 
           name: userName 
         });

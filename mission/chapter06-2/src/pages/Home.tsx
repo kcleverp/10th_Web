@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { getLps } from '../apis/lpApi';
 import LpCard from '../component/LpChip';
@@ -29,6 +29,7 @@ const Home = () => {
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
     initialPageParam: 0,
     staleTime: 1000 * 60,
+    placeholderData: keepPreviousData,
   });
 
   // 2. 스크롤 감지 시 다음 페이지 호출

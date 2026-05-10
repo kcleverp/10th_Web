@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import useLpDetail from '../hooks/useLpDetail';
 import { useAuth } from '../context/AuthContext';
 import { likeLp, deleteLp, getLpComments } from '../apis/lpApi';
-import CommentSkeleton from '../component/CommentSkeleton'; // 방금 만든 스켈레톤 추가
+import CommentSkeleton from '../component/CommentSkeleton'; 
 
 const LpDetailPage = () => {
   const { lpId } = useParams();
@@ -13,7 +13,6 @@ const LpDetailPage = () => {
   const { user } = useAuth();
   const { ref, inView } = useInView();
 
-  // 🚩 [체크리스트 반영] 정렬 상태를 URL 쿼리 파라미터와 동기화
   const [searchParams, setSearchParams] = useSearchParams();
   const order = (searchParams.get('order') as 'desc' | 'asc') || 'desc';
 
@@ -47,7 +46,7 @@ const LpDetailPage = () => {
 
   const isOwner = useMemo(() => {
     if (!user || !lp || !lp.author) return false;
-    return user.email === lp.author.name; 
+    return user.id === lp.author.id; 
   }, [user, lp]);
 
   if (isLoading) return <div className="py-20 text-center text-gray-400 animate-pulse">LOADING...</div>;
@@ -57,7 +56,6 @@ const LpDetailPage = () => {
     <div className="flex flex-col items-center py-12 px-6">
       <div className="w-full max-w-[400px] flex flex-col gap-6">
         
-        {/* --- LP 상세 정보 영역 --- */}
         <div className="flex justify-between items-end border-b pb-4">
           <h1 className="text-2xl font-black tracking-tighter">{lp.title}</h1>
           {isOwner && (
@@ -97,7 +95,6 @@ const LpDetailPage = () => {
 
         <div className="h-[2px] bg-gray-50 my-8" />
 
-        {/* --- 댓글 작성 섹션 --- */}
         <section className="flex flex-col gap-4">
           <h3 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Comment</h3>
           <div className="flex flex-col gap-2">
@@ -114,7 +111,6 @@ const LpDetailPage = () => {
           </div>
         </section>
 
-        {/* --- 댓글 목록 섹션 --- */}
         <section className="flex flex-col gap-6 mt-8">
           <div className="flex justify-between items-center border-b pb-2">
             <span className="text-[10px] font-black tracking-widest text-gray-400">ARCHIVE ({allComments.length})</span>
@@ -126,7 +122,6 @@ const LpDetailPage = () => {
 
           <div className="flex flex-col gap-6">
             {isCommentsLoading ? (
-              // 🚩 초기 로딩: 전용 스켈레톤 3개
               Array.from({ length: 3 }).map((_, i) => (
                 <CommentSkeleton key={`init-${i}`} />
               ))
@@ -142,7 +137,6 @@ const LpDetailPage = () => {
                   </div>
                 ))}
                 
-                {/* 🚩 추가 로딩: 하단에 스켈레톤 1개 표시 */}
                 {isFetchingNextPage && <CommentSkeleton />}
               </>
             )}

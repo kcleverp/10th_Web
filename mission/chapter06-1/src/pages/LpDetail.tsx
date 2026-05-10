@@ -12,7 +12,7 @@ const LpDetailPage = () => {
 
   const isOwner = useMemo(() => {
     if (!user || !lp || !lp.author) return false;
-    return user.email === lp.author.name; 
+    return user.id === lp.author.id; 
   }, [user, lp]);
 
   if (isLoading) return <div className="py-20 text-center text-gray-400 animate-pulse">LOADING...</div>;
