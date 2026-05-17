@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { uploadImage } from '../apis/uploadApi';
 
-import { useMypage } from '../hooks/useMypage';
+import { useMypage, MY_INFO_QUERY_KEY } from '../hooks/useMypage';
 
 type PatchProfileRollback = {
   prevData: ResponseMyInfo;
@@ -30,8 +30,6 @@ const Mypage = () => {
   const {
 
     data,
-
-    setData,
 
     isDataLoading,
 
@@ -86,26 +84,29 @@ const Mypage = () => {
     },
 
     onMutate: (): PatchProfileRollback | undefined => {
-      if (!user || !data?.data) return;
+      if (!user) return;
 
-      const prevData = { ...data, data: { ...data.data } };
+      const current = queryClient.getQueryData<ResponseMyInfo>(MY_INFO_QUERY_KEY);
+      if (!current?.data) return;
+
+      const prevData = { ...current, data: { ...current.data } };
       const prevUser = { id: user.id, email: user.email, name: user.name };
 
       const bioTrim = bio.trim();
       const nextBio: string | null = bioTrim ? bioTrim : null;
 
-      setData({
-        ...data,
+      queryClient.setQueryData(MY_INFO_QUERY_KEY, {
+        ...current,
         data: {
-          ...data.data,
+          ...current.data,
           name: name.trim(),
           bio: nextBio,
         },
       });
 
       syncUserFromProfile({
-        id: data.data.id,
-        email: data.data.email,
+        id: current.data.id,
+        email: current.data.email,
         name: name.trim(),
       });
 
@@ -113,15 +114,11 @@ const Mypage = () => {
     },
 
     onError: (_err, _vars, ctx) => {
-      if (ctx?.prevData) setData(ctx.prevData);
+      if (ctx?.prevData) queryClient.setQueryData(MY_INFO_QUERY_KEY, ctx.prevData);
       if (ctx?.prevUser) syncUserFromProfile(ctx.prevUser);
     },
 
     onSuccess: (res) => {
-      setData(res);
-
-      queryClient.invalidateQueries({ queryKey: ['me'] });
-
       if (res.data) {
         syncUserFromProfile({
           id: res.data.id,
@@ -131,6 +128,8 @@ const Mypage = () => {
       }
 
       setSettingsOpen(false);
+
+      queryClient.invalidateQueries({ queryKey: MY_INFO_QUERY_KEY });
     },
   });
 

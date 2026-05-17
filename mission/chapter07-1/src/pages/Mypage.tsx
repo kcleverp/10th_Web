@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { uploadImage } from '../apis/uploadApi';
 
-import { useMypage } from '../hooks/useMypage';
+import { useMypage, MY_INFO_QUERY_KEY } from '../hooks/useMypage';
 
 
 
@@ -27,8 +27,6 @@ const Mypage = () => {
   const {
 
     data,
-
-    setData,
 
     isDataLoading,
 
@@ -95,27 +93,17 @@ const Mypage = () => {
     },
 
     onSuccess: (res) => {
-
-      setData(res);
-
-      queryClient.invalidateQueries({ queryKey: ['me'] });
-
       if (res.data) {
-
         syncUserFromProfile({
-
           id: res.data.id,
-
           email: res.data.email,
-
           name: res.data.name,
-
         });
-
       }
 
       setSettingsOpen(false);
 
+      queryClient.invalidateQueries({ queryKey: MY_INFO_QUERY_KEY });
     },
 
   });

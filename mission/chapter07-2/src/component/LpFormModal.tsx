@@ -34,8 +34,10 @@ const LpFormModal = ({ isOpen, onClose, mode, initialLp }: LpFormModalProps) => 
   } = useLpFormModalState(isOpen, mode, initialLp);
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    onMutate: () => {
       setErrorMsg(null);
+    },
+    mutationFn: async () => {
       if (!title.trim() || !content.trim()) {
         throw new Error('제목과 내용을 입력해주세요.');
       }

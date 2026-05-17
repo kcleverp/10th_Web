@@ -25,7 +25,7 @@ const LpDetailPage = () => {
     setSearchParams({ order: newOrder });
   };
 
-  const { data: lp, isLoading, isError, refetch } = useLpDetail(Number(lpId));
+  const { data: lp, isLoading, isError } = useLpDetail(Number(lpId));
 
   const { ref, allComments, isFetchingNextPage, isCommentsLoading } =
     useLpComments(lpId, order);
@@ -52,7 +52,6 @@ const LpDetailPage = () => {
       lpId,
       lp,
       userId: user?.id,
-      refetchLp: refetch,
       commentText,
       setCommentText,
       setCommentErr,

@@ -73,7 +73,6 @@ export type UseLpDetailMutationsArgs = {
   lpId: string | undefined;
   lp: Lp | undefined;
   userId: number | undefined;
-  refetchLp: () => void;
   commentText: string;
   setCommentText: Dispatch<SetStateAction<string>>;
   setCommentErr: Dispatch<SetStateAction<string | null>>;
@@ -85,7 +84,6 @@ export function useLpDetailMutations({
   lpId,
   lp,
   userId,
-  refetchLp,
   commentText,
   setCommentText,
   setCommentErr,
@@ -181,7 +179,10 @@ export function useLpDetailMutations({
       }
     },
     onSettled: () => {
-      refetchLp();
+      if (lpId == null) return;
+      const id = Number(lpId);
+      if (!id || Number.isNaN(id)) return;
+      queryClient.invalidateQueries({ queryKey: ['lps', 'detail', id] });
     },
   });
 

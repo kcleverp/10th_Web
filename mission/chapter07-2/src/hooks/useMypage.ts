@@ -1,15 +1,15 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { getMyInfo } from '../apis/auth';
-import type { ResponseMyInfo } from '../types/authType';
+
+export const MY_INFO_QUERY_KEY = ['myInfo'] as const;
 
 export function useMypage(
   isAuthenticated: boolean,
   isAuthLoading: boolean,
   navigate: NavigateFunction
 ) {
-  const [data, setData] = useState<ResponseMyInfo | null>(null);
-  const [isDataLoading, setIsDataLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [name, setName] = useState('');
@@ -21,25 +21,16 @@ export function useMypage(
     if (!isAuthLoading && !isAuthenticated) {
       alert('로그인이 필요한 페이지입니다.');
       navigate('/login');
-      return;
-    }
-
-    const getData = async () => {
-      try {
-        setIsDataLoading(true);
-        const response = await getMyInfo();
-        setData(response);
-      } catch (error) {
-        console.error('내 정보 불러오기 실패:', error);
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-
-    if (isAuthenticated) {
-      getData();
     }
   }, [isAuthenticated, isAuthLoading, navigate]);
+
+  const { data, isLoading: isQueryLoading } = useQuery({
+    queryKey: MY_INFO_QUERY_KEY,
+    queryFn: getMyInfo,
+    enabled: isAuthenticated && !isAuthLoading,
+  });
+
+  const isDataLoading = isAuthenticated && !isAuthLoading && isQueryLoading;
 
   useEffect(() => {
     if (!settingsOpen || !data?.data) return;
@@ -69,7 +60,6 @@ export function useMypage(
 
   return {
     data,
-    setData,
     isDataLoading,
     settingsOpen,
     setSettingsOpen,
