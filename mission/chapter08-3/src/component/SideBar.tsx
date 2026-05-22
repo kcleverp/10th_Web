@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { withdrawUser } from '../apis/auth';
+import Modal from './Modal';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -152,40 +153,35 @@ const Sidebar = ({
 
   const withdrawModal =
     withdrawModalOpen && user ? (
-      <div
-        className="fixed inset-0 z-[110] flex items-center justify-center bg-black/20 backdrop-blur-sm px-4"
-        onClick={() => !withdrawMutation.isPending && setWithdrawModalOpen(false)}
-        role="presentation"
+      <Modal
+        isOpen={true}
+        onClose={() => setWithdrawModalOpen(false)}
+        closeDisabled={withdrawMutation.isPending}
+        zIndex={110}
+        panelClassName="w-full max-w-sm bg-white border border-[#eee] shadow-2xl rounded-sm p-6 flex flex-col gap-4"
       >
-        <div
-          className="w-full max-w-sm bg-white border border-[#eee] shadow-2xl rounded-sm p-6 flex flex-col gap-4"
-          onClick={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-        >
-          <p className="text-sm font-bold text-gray-800 leading-relaxed">
-            정말 탈퇴하시겠습니까? 모든 게시글·댓글·좋아요와 회원 정보가 삭제됩니다.
-          </p>
-          <div className="flex gap-3 justify-end">
-            <button
-              type="button"
-              disabled={withdrawMutation.isPending}
-              onClick={() => setWithdrawModalOpen(false)}
-              className="px-4 py-2 border border-[#ccc] text-[10px] font-black tracking-widest rounded-sm hover:bg-gray-50 disabled:opacity-50"
-            >
-              아니오
-            </button>
-            <button
-              type="button"
-              disabled={withdrawMutation.isPending}
-              onClick={() => withdrawMutation.mutate()}
-              className="px-4 py-2 bg-black text-white text-[10px] font-black tracking-widest rounded-sm hover:bg-red-600 disabled:opacity-50"
-            >
-              예
-            </button>
-          </div>
+        <p className="text-sm font-bold text-gray-800 leading-relaxed">
+          정말 탈퇴하시겠습니까? 모든 게시글·댓글·좋아요와 회원 정보가 삭제됩니다.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <button
+            type="button"
+            disabled={withdrawMutation.isPending}
+            onClick={() => setWithdrawModalOpen(false)}
+            className="px-4 py-2 border border-[#ccc] text-[10px] font-black tracking-widest rounded-sm hover:bg-gray-50 disabled:opacity-50"
+          >
+            아니오
+          </button>
+          <button
+            type="button"
+            disabled={withdrawMutation.isPending}
+            onClick={() => withdrawMutation.mutate()}
+            className="px-4 py-2 bg-black text-white text-[10px] font-black tracking-widest rounded-sm hover:bg-red-600 disabled:opacity-50"
+          >
+            예
+          </button>
         </div>
-      </div>
+      </Modal>
     ) : null;
 
   if (isStatic) {

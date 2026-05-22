@@ -1,7 +1,8 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getMyInfo } from '../apis/auth';
+import { usePreviewUrl } from './usePreviewUrl';
 
 export const MY_INFO_QUERY_KEY = ['myInfo'] as const;
 
@@ -14,8 +15,6 @@ export function useMypage(
 
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -32,31 +31,24 @@ export function useMypage(
 
   const isDataLoading = isAuthenticated && !isAuthLoading && isQueryLoading;
 
+  const remoteUrl = data?.data.avatar ?? null;
+  const {
+    previewUrl: avatarPreview,
+    selectedFile: avatarFile,
+    handleFileChange: handleAvatarChange,
+  } = usePreviewUrl(settingsOpen, remoteUrl);
+
   useEffect(() => {
-    if (!settingsOpen || !data?.data) return;
+    if (!settingsOpen) {
+      setName('');
+      setBio('');
+      return;
+    }
+
+    if (!data?.data) return;
     setName(data.data.name);
     setBio(data.data.bio ?? '');
-    setAvatarFile(null);
-    setAvatarPreview(data.data.avatar);
   }, [settingsOpen, data]);
-
-  useEffect(() => {
-    return () => {
-      if (avatarPreview && avatarPreview.startsWith('blob:')) {
-        URL.revokeObjectURL(avatarPreview);
-      }
-    };
-  }, [avatarPreview]);
-
-  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setAvatarFile(f);
-    setAvatarPreview((prev) => {
-      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
-      return URL.createObjectURL(f);
-    });
-  };
 
   return {
     data,

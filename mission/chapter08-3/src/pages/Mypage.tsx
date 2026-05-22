@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { uploadImage } from '../apis/uploadApi';
 
 import { useMypage, MY_INFO_QUERY_KEY } from '../hooks/useMypage';
+import Modal from '../component/Modal';
 
 type PatchProfileRollback = {
   prevData: ResponseMyInfo;
@@ -243,121 +244,49 @@ const Mypage = () => {
 
 
 
-      {settingsOpen && (
+      <Modal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        closeDisabled={patchMutation.isPending}
+        title="PROFILE SETTINGS"
+      >
+        <label className="flex flex-col gap-1">
+          <span className="text-[10px] font-black tracking-widest text-gray-400">NAME</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="border border-[#ccc] rounded-sm px-3 py-2 text-sm outline-none focus:border-[#807bff]"
+          />
+        </label>
 
-        <div
+        <label className="flex flex-col gap-1">
+          <span className="text-[10px] font-black tracking-widest text-gray-400">BIO (선택)</span>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={3}
+            className="border border-[#ccc] rounded-sm px-3 py-2 text-sm outline-none focus:border-[#807bff] resize-none"
+            placeholder="비워두면 저장 시 비게 됩니다."
+          />
+        </label>
 
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm px-4"
-
-          onClick={() => !patchMutation.isPending && setSettingsOpen(false)}
-
-          role="presentation"
-
-        >
-
-          <div
-
-            className="w-full max-w-md bg-white border border-[#eee] shadow-2xl rounded-sm p-6 flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
-
-            onClick={(e) => e.stopPropagation()}
-
-            role="dialog"
-
-            aria-modal="true"
-
-          >
-
-            <div className="flex justify-between border-b border-[#f0f0f0] pb-3">
-
-              <h2 className="text-sm font-black tracking-widest text-[#807bff]">PROFILE SETTINGS</h2>
-
-              <button type="button" className="text-gray-400 hover:text-black" onClick={() => setSettingsOpen(false)}>
-
-                ×
-
-              </button>
-
-            </div>
-
-
-
-            <label className="flex flex-col gap-1">
-
-              <span className="text-[10px] font-black tracking-widest text-gray-400">NAME</span>
-
-              <input
-
-                value={name}
-
-                onChange={(e) => setName(e.target.value)}
-
-                className="border border-[#ccc] rounded-sm px-3 py-2 text-sm outline-none focus:border-[#807bff]"
-
-              />
-
-            </label>
-
-
-
-            <label className="flex flex-col gap-1">
-
-              <span className="text-[10px] font-black tracking-widest text-gray-400">BIO (선택)</span>
-
-              <textarea
-
-                value={bio}
-
-                onChange={(e) => setBio(e.target.value)}
-
-                rows={3}
-
-                className="border border-[#ccc] rounded-sm px-3 py-2 text-sm outline-none focus:border-[#807bff] resize-none"
-
-                placeholder="비워두면 저장 시 비게 됩니다."
-
-              />
-
-            </label>
-
-
-
-            <div className="flex flex-col gap-2">
-
-              <span className="text-[10px] font-black tracking-widest text-gray-400">AVATAR (선택)</span>
-
-              <input type="file" accept="image/*" onChange={handleAvatarChange} className="text-xs" />
-
-              {avatarPreview && (
-
-                <img src={avatarPreview} alt="" className="w-16 h-16 rounded-full object-cover border border-[#eee]" />
-
-              )}
-
-            </div>
-
-
-
-            <button
-
-              type="button"
-
-              disabled={patchMutation.isPending || !name.trim()}
-
-              onClick={() => patchMutation.mutate()}
-
-              className="w-full py-4 bg-black text-white text-[10px] font-black tracking-widest hover:bg-[#807bff] transition-colors disabled:bg-gray-300 rounded-sm"
-
-            >
-
-              {patchMutation.isPending ? 'SAVING…' : 'SAVE'}
-
-            </button>
-
-          </div>
-
+        <div className="flex flex-col gap-2">
+          <span className="text-[10px] font-black tracking-widest text-gray-400">AVATAR (선택)</span>
+          <input type="file" accept="image/*" onChange={handleAvatarChange} className="text-xs" />
+          {avatarPreview && (
+            <img src={avatarPreview} alt="" className="w-16 h-16 rounded-full object-cover border border-[#eee]" />
+          )}
         </div>
 
-      )}
+        <button
+          type="button"
+          disabled={patchMutation.isPending || !name.trim()}
+          onClick={() => patchMutation.mutate()}
+          className="w-full py-4 bg-black text-white text-[10px] font-black tracking-widest hover:bg-[#807bff] transition-colors disabled:bg-gray-300 rounded-sm"
+        >
+          {patchMutation.isPending ? 'SAVING…' : 'SAVE'}
+        </button>
+      </Modal>
 
     </div>
 
