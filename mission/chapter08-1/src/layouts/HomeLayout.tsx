@@ -5,43 +5,19 @@ import Sidebar from '../component/SideBar';
 import LpFormModal from '../component/LpFormModal';
 import { useAuth } from '../context/AuthContext';
 import { LpModalOutletContext } from '../context/LpModalOutletContext';
-import type { HomeLayoutOutletContext } from '../types/layout';
-import type { Lp } from '../types/common';
+import { useLpModalController } from '../hooks/useLpModalController';
 
 const HomeLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [lpModalOpen, setLpModalOpen] = useState(false);
-  const [lpModalMode, setLpModalMode] = useState<'create' | 'edit'>('create');
-  const [editLp, setEditLp] = useState<Lp | null>(null);
+  const { outletContext, modalProps } = useLpModalController(user, navigate);
 
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => navigate('/'),
   });
-
-  const openLpModalCreate = () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    setLpModalMode('create');
-    setEditLp(null);
-    setLpModalOpen(true);
-  };
-
-  const openLpModalEdit = (lp: Lp) => {
-    setLpModalMode('edit');
-    setEditLp(lp);
-    setLpModalOpen(true);
-  };
-
-  const outletContext: HomeLayoutOutletContext = {
-    openLpModalCreate,
-    openLpModalEdit,
-  };
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -122,7 +98,7 @@ const HomeLayout = () => {
           </LpModalOutletContext.Provider>
           <button
             type="button"
-            onClick={openLpModalCreate}
+            onClick={outletContext.openLpModalCreate}
             className="fixed bottom-8 right-8 w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-[#807bff] hover:-translate-y-1 transition-all z-40 group"
           >
             <span className="text-2xl group-hover:rotate-90 transition-transform">+</span>
@@ -130,12 +106,7 @@ const HomeLayout = () => {
         </main>
       </div>
 
-      <LpFormModal
-        isOpen={lpModalOpen}
-        onClose={() => setLpModalOpen(false)}
-        mode={lpModalMode}
-        initialLp={editLp}
-      />
+      <LpFormModal {...modalProps} />
     </div>
   );
 };

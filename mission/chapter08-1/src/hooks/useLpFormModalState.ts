@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Lp } from '../types/common';
+import { usePreviewUrl } from './usePreviewUrl';
 
 export type LpFormModalMode = 'create' | 'edit';
 
@@ -22,15 +23,29 @@ export function useLpFormModalState(
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [published, setPublished] = useState(true);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const remoteUrl = useMemo(
+    () => (mode === 'edit' && initialLp ? initialLp.thumbnail ?? null : null),
+    [mode, initialLp]
+  );
+
+  const { previewUrl, selectedFile, handleFileChange } = usePreviewUrl(isOpen, remoteUrl);
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      const e = emptyForm();
+      setTitle(e.title);
+      setContent(e.content);
+      setThumbnailUrl(e.thumbnailUrl);
+      setTags(e.tags);
+      setPublished(e.published);
+      setTagInput('');
+      setErrorMsg(null);
+      return;
+    }
 
     setErrorMsg(null);
-    setSelectedFile(null);
     setTagInput('');
 
     if (mode === 'edit' && initialLp) {
@@ -39,7 +54,6 @@ export function useLpFormModalState(
       setThumbnailUrl(initialLp.thumbnail ?? '');
       setTags(initialLp.tags.map((t) => t.name));
       setPublished(initialLp.published);
-      setPreviewUrl(initialLp.thumbnail ?? null);
     } else {
       const e = emptyForm();
       setTitle(e.title);
@@ -47,34 +61,15 @@ export function useLpFormModalState(
       setThumbnailUrl(e.thumbnailUrl);
       setTags(e.tags);
       setPublished(e.published);
-      setPreviewUrl(null);
     }
   }, [isOpen, mode, initialLp]);
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl && previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  const handleFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setSelectedFile(file);
-    setPreviewUrl((prev) => {
-      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
-      return URL.createObjectURL(file);
-    });
-  }, []);
-
   const addTag = useCallback(() => {
     const t = tagInput.trim();
-    if (!t || tags.includes(t)) return;
-    setTags([...tags, t]);
+    if (!t) return;
+    setTags((prev) => (prev.includes(t) ? prev : [...prev, t]));
     setTagInput('');
-  }, [tags, tagInput]);
+  }, [tagInput]);
 
   const removeTag = useCallback((name: string) => {
     setTags((prev) => prev.filter((x) => x !== name));
