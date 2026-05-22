@@ -62,7 +62,6 @@ const Home = () => {
 
   useEffect(() => {
     if (throttledInView && hasNextPage && !isFetchingNextPage) {
-      console.log('[useThrottle] fetchNextPage 호출', new Date().toISOString());
       fetchNextPage();
     }
   }, [throttledInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
