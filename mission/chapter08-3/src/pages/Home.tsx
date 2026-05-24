@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { getLps, getLpsByTag } from '../apis/lpApi';
-import { useDebounce } from '../hooks/useDebounce';
 import { useThrottle } from '../hooks/useThrottle';
 import LpCard from '../component/LpChip';
 import SkeletonCard from '../component/SkeletonCard';
@@ -15,8 +14,7 @@ const GC_TIME = 5 * 60_000;
 const Home = () => {
   const [searchParams] = useSearchParams();
   const rawSearch = searchParams.get('search') ?? '';
-  const debouncedQuery = useDebounce(rawSearch, 300);
-  const trimmed = debouncedQuery.trim();
+  const trimmed = rawSearch.trim();
   const isSearchMode = trimmed.length > 0;
 
   const [order, setOrder] = useState<'desc' | 'asc'>('desc');
@@ -26,30 +24,6 @@ const Home = () => {
   });
   const throttledInView = useThrottle(inView, 3000);
 
-  const listQuery = useInfiniteQuery({
-    queryKey: ['lps', { order }],
-    queryFn: ({ pageParam = 0 }) => getLps(order, pageParam as number, 12),
-    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
-    initialPageParam: 0,
-    enabled: !isSearchMode,
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
-    placeholderData: keepPreviousData,
-  });
-
-  const searchQuery = useInfiniteQuery({
-    queryKey: ['search', trimmed],
-    queryFn: ({ pageParam = 0 }) => getLpsByTag(trimmed, pageParam as number, 12),
-    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
-    initialPageParam: 0,
-    enabled: isSearchMode,
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
-    placeholderData: keepPreviousData,
-  });
-
-  const activeQuery = isSearchMode ? searchQuery : listQuery;
-
   const {
     data,
     isLoading,
@@ -58,15 +32,33 @@ const Home = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = activeQuery;
+    isFetching,
+  } = useInfiniteQuery({
+    queryKey: isSearchMode
+      ? (['search', trimmed] as const)
+      : (['lps', { order }] as const),
+    queryFn: ({ pageParam = 0 }) =>
+      isSearchMode
+        ? getLpsByTag(trimmed, pageParam as number, 12)
+        : getLps(order, pageParam as number, 12),
+    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
+    initialPageParam: 0,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    placeholderData: keepPreviousData,
+  });
+
+  const fetchNextPageRef = useRef(fetchNextPage);
+  fetchNextPageRef.current = fetchNextPage;
 
   useEffect(() => {
     if (throttledInView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      fetchNextPageRef.current();
     }
-  }, [throttledInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [throttledInView, hasNextPage, isFetchingNextPage]);
 
   const allLps = data?.pages.flatMap((page) => page.data) || [];
+  const showGridSkeleton = isLoading || (isFetching && !isFetchingNextPage && !data);
 
   if (isError) {
     return (
@@ -113,7 +105,7 @@ const Home = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
-        {isLoading ? (
+        {showGridSkeleton ? (
           [...Array(12).keys()].map((i) => <SkeletonCard key={i} />)
         ) : (
           <>
@@ -137,7 +129,7 @@ const Home = () => {
         )}
       </div>
 
-      {!isLoading && allLps.length === 0 && (
+      {!showGridSkeleton && allLps.length === 0 && (
         <div className="text-center py-32 animate-in fade-in slide-in-from-bottom-4">
           <p className="text-gray-300 text-xs italic tracking-widest font-bold">NO RECORDS FOUND.</p>
         </div>

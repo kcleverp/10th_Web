@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { withdrawUser } from '../apis/auth';
@@ -11,6 +11,8 @@ interface SidebarProps {
   isStatic?: boolean;
   onLogout: () => void;
   logoutPending?: boolean;
+  search: string;
+  onSearchChange: (value: string) => void;
 }
 
 const Sidebar = ({
@@ -19,16 +21,12 @@ const Sidebar = ({
   isStatic = false,
   onLogout,
   logoutPending = false,
+  search,
+  onSearchChange,
 }: SidebarProps) => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { user, clearLocalSession } = useAuth();
-  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
-
-  useEffect(() => {
-    setSearch(searchParams.get('search') ?? '');
-  }, [searchParams]);
 
   const withdrawMutation = useMutation({
     mutationFn: withdrawUser,
@@ -46,14 +44,7 @@ const Sidebar = ({
   };
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
-    const next = new URLSearchParams(searchParams);
-    if (value) {
-      next.set('search', value);
-    } else {
-      next.delete('search');
-    }
-    setSearchParams(next, { replace: true });
+    onSearchChange(value);
   };
 
   const handleSearch = (e: React.FormEvent) => {

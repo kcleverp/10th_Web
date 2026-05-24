@@ -6,9 +6,11 @@ import LpFormModal from '../component/LpFormModal';
 import { useAuth } from '../context/AuthContext';
 import { LpModalOutletContext } from '../context/LpModalOutletContext';
 import { useLpModalController } from '../hooks/useLpModalController';
+import { useSidebarSearch } from '../hooks/useSidebarSearch';
 
 const HomeLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { search, setSearch } = useSidebarSearch();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -27,6 +29,8 @@ const HomeLayout = () => {
         isStatic={false}
         onLogout={() => logoutMutation.mutate()}
         logoutPending={logoutMutation.isPending}
+        search={search}
+        onSearchChange={setSearch}
       />
 
       <div className="hidden lg:block w-64 border-r border-[#eee]">
@@ -36,6 +40,8 @@ const HomeLayout = () => {
           isStatic={true}
           onLogout={() => logoutMutation.mutate()}
           logoutPending={logoutMutation.isPending}
+          search={search}
+          onSearchChange={setSearch}
         />
       </div>
 
