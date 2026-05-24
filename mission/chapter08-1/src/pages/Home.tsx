@@ -49,8 +49,13 @@ const Home = () => {
   const fetchNextPageRef = useRef(fetchNextPage);
   fetchNextPageRef.current = fetchNextPage;
 
+  const prevInViewRef = useRef(false);
+
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
+    const enteredView = inView && !prevInViewRef.current;
+    prevInViewRef.current = inView;
+
+    if (enteredView && hasNextPage && !isFetchingNextPage) {
       fetchNextPageRef.current();
     }
   }, [inView, hasNextPage, isFetchingNextPage]);

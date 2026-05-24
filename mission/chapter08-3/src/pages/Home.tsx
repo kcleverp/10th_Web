@@ -22,7 +22,7 @@ const Home = () => {
   const { ref, inView } = useInView({
     threshold: 0.5,
   });
-  const throttledInView = useThrottle(inView, 3000);
+  const throttledInView = useThrottle(inView, 300);
 
   const {
     data,
@@ -51,8 +51,13 @@ const Home = () => {
   const fetchNextPageRef = useRef(fetchNextPage);
   fetchNextPageRef.current = fetchNextPage;
 
+  const prevThrottledInViewRef = useRef(false);
+
   useEffect(() => {
-    if (throttledInView && hasNextPage && !isFetchingNextPage) {
+    const enteredView = throttledInView && !prevThrottledInViewRef.current;
+    prevThrottledInViewRef.current = throttledInView;
+
+    if (enteredView && hasNextPage && !isFetchingNextPage) {
       fetchNextPageRef.current();
     }
   }, [throttledInView, hasNextPage, isFetchingNextPage]);
