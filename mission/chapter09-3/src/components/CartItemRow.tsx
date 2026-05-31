@@ -6,7 +6,7 @@ type CartItemRowProps = {
 }
 
 const CartItemRow = ({ item }: CartItemRowProps) => {
-  const { increase, decrease } = usePlaylistStore()
+  const { increase, decrease, removeItem } = usePlaylistStore()
 
   return (
     <article className="flex items-center justify-between border-b border-gray-200 py-4">
@@ -23,25 +23,35 @@ const CartItemRow = ({ item }: CartItemRowProps) => {
         </div>
       </div>
 
-      <div className="flex overflow-hidden rounded-md border border-gray-300">
+      <div className="flex items-center">
+        <div className="flex overflow-hidden rounded-md border border-gray-300">
+          <button
+            type="button"
+            onClick={() => decrease(item.id)}
+            className="bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
+            aria-label={`${item.title} 수량 감소`}
+          >
+            -
+          </button>
+          <span className="min-w-[2.5rem] border-x border-gray-300 bg-white px-3 py-1 text-center">
+            {item.amount}
+          </span>
+          <button
+            type="button"
+            onClick={() => increase(item.id)}
+            className="bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
+            aria-label={`${item.title} 수량 증가`}
+          >
+            +
+          </button>
+        </div>
         <button
           type="button"
-          onClick={() => decrease(item.id)}
-          className="bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
-          aria-label={`${item.title} 수량 감소`}
+          onClick={() => removeItem(item.id)}
+          className="ml-4 text-red-500 hover:text-red-700"
+          aria-label={`${item.title} 삭제`}
         >
-          -
-        </button>
-        <span className="min-w-[2.5rem] border-x border-gray-300 bg-white px-3 py-1 text-center">
-          {item.amount}
-        </span>
-        <button
-          type="button"
-          onClick={() => increase(item.id)}
-          className="bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
-          aria-label={`${item.title} 수량 증가`}
-        >
-          +
+          ✕
         </button>
       </div>
     </article>

@@ -31,15 +31,15 @@ export const usePlaylistStore = create<PlaylistStore>((set) => ({
 
   decrease: (id) =>
     set((state) => {
-      const target = state.cartItems.find((item) => item.id === id)
-      if (!target) return state
-
-      const cartItems =
-        target.amount <= 1
-          ? state.cartItems.filter((item) => item.id !== id)
-          : state.cartItems.map((item) =>
-              item.id === id ? { ...item, amount: item.amount - 1 } : item,
-            )
+      const cartItems = state.cartItems.reduce<CartItem[]>((acc, item) => {
+        if (item.id === id) {
+          if (item.amount <= 1) return acc
+          acc.push({ ...item, amount: item.amount - 1 })
+        } else {
+          acc.push(item)
+        }
+        return acc
+      }, [])
 
       return { cartItems, ...recalculateTotals(cartItems) }
     }),

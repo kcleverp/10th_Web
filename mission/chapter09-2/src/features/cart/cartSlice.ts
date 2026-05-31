@@ -36,11 +36,12 @@ const cartSlice = createSlice({
       const item = state.cartItems.find((cartItem) => cartItem.id === action.payload)
       if (!item) return
 
-      item.amount -= 1
-      if (item.amount < 1) {
+      if (item.amount <= 1) {
         state.cartItems = state.cartItems.filter(
           (cartItem) => cartItem.id !== action.payload,
         )
+      } else {
+        item.amount -= 1
       }
       recalculateTotals(state)
     },
@@ -55,13 +56,9 @@ const cartSlice = createSlice({
       state.amount = 0
       state.total = 0
     },
-    calculateTotals: (state) => {
-      recalculateTotals(state)
-    },
   },
 })
 
-export const { increase, decrease, removeItem, clearCart, calculateTotals } =
-  cartSlice.actions
+export const { increase, decrease, removeItem, clearCart } = cartSlice.actions
 
 export default cartSlice.reducer
