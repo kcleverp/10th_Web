@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useRenderLog } from '../hooks/useRenderLog';
 
 interface InputProps {
@@ -8,8 +9,9 @@ interface InputProps {
   name?: string;
 }
 
-export default function Input({ label, value, onChange, placeholder, name }: InputProps) {
+const Input = memo(function Input({ label, value, onChange, placeholder, name }: InputProps) {
   useRenderLog('Input');
+
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={name} className="text-sm font-semibold text-gray-700">
@@ -26,4 +28,6 @@ export default function Input({ label, value, onChange, placeholder, name }: Inp
       />
     </div>
   );
-}
+});
+
+export default Input;

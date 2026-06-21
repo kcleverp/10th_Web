@@ -25,8 +25,6 @@ export default memo(function MovieDetailModal({ movie, language, onClose }: Movi
     ? `${TMDB_IMAGE_BASE}/w500${movie.poster_path}`
     : 'https://via.placeholder.com/500x750?text=No+Image';
 
-  const popularityPercent = Math.min(Math.round(movie.popularity), 100);
-
   const handleImdbSearch = () => {
     window.open(
       `https://www.imdb.com/find?q=${encodeURIComponent(movie.title)}`,
@@ -86,13 +84,10 @@ export default memo(function MovieDetailModal({ movie, language, onClose }: Movi
             </div>
 
             <div>
-              <h3 className="mb-2 text-sm font-bold text-gray-800">인기도</h3>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                <div
-                  className="h-full rounded-full bg-blue-500 transition-all"
-                  style={{ width: `${popularityPercent}%` }}
-                />
-              </div>
+              <h3 className="mb-1 text-sm font-bold text-gray-800">인기도</h3>
+              <p className="text-sm text-gray-600">
+                🔥 {movie.popularity.toFixed(0)}
+              </p>
             </div>
 
             <div>
